@@ -1,0 +1,39 @@
+{
+  "name": "youtube-timeline",
+  "type": "module",
+  "version": "1.0.0",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "predev": "node scripts/sync-data.mjs",
+    "dev": "astro dev",
+    "prebuild": "node scripts/sync-data.mjs",
+    "build": "astro build",
+    "preview": "astro preview",
+    "fetch-videos": "node --env-file-if-exists=.env scripts/fetch-videos.mjs",
+    "sync-data": "node scripts/sync-data.mjs",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "astro": "^7.2.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@tailwindcss/vite": "^4.1.11",
+    "@types/node": "^26.2.0",
+    "eslint": "^10.8.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-astro": "^1.7.0",
+    "globals": "^17.9.0",
+    "prettier": "^3.9.6",
+    "prettier-plugin-astro": "^0.14.1",
+    "tailwindcss": "^4.1.11",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.67.0"
+  }
+}

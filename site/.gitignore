@@ -1,0 +1,13 @@
+# build output
+dist/
+# generated
+.astro/
+# deps
+node_modules/
+# synced data (regenerated from data/videos on build)
+public/videos/
+# environment
+.env
+.env.production
+# logs
+npm-debug.log*

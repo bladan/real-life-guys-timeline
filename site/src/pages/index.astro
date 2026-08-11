@@ -1,0 +1,672 @@
+---
+import '../styles/global.css';
+import { readdirSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
+// Read all channels' metadata at build time from the source data folder.
+const videosDir = resolve(process.cwd(), 'data/videos');
+const palette = ['#ef4444', '#38bdf8', '#34d399', '#f59e0b', '#a78bfa'];
+
+type ChannelMeta = {
+  id: string;
+  title: string;
+  videoCount: number;
+  pageCount: number;
+  years: number[];
+  color: string;
+  order: number;
+};
+
+const channels: ChannelMeta[] = readdirSync(videosDir, { withFileTypes: true })
+  .filter((d) => d.isDirectory())
+  .map((d) => d.name)
+  .map((id) => {
+    const index = JSON.parse(
+      readFileSync(resolve(videosDir, id, 'index.json'), 'utf-8')
+    );
+    const pageCount: number = index.page_count;
+    const channelYears = [
+      ...new Set(
+        Array.from({ length: pageCount }, (_, n) => n + 1).flatMap((n) => {
+          const page = JSON.parse(
+            readFileSync(resolve(videosDir, id, `page-${n}.json`), 'utf-8')
+          );
+          return (page.videos ?? []).map((v: { published_at: string }) =>
+            new Date(v.published_at).getFullYear()
+          );
+        })
+      ),
+    ].sort((a, b) => b - a);
+    return {
+      id,
+      title: index.channel_title ?? id,
+      videoCount: index.video_count as number,
+      pageCount,
+      years: channelYears,
+      color: '',
+      order: index.order ?? Number.MAX_SAFE_INTEGER,
+    };
+  });
+
+// Order comes from each channel's index.json (driven by YOUTUBE_CHANNELS order).
+channels.sort((a, b) => a.order - b.order);
+channels.forEach((c, i) => {
+  c.color = palette[i % palette.length];
+});
+
+const totalVideoCount = channels.reduce((sum, c) => sum + c.videoCount, 0);
+const years: number[] = [...new Set(channels.flatMap((c) => c.years))].sort(
+  (a, b) => b - a
+);
+---
+
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`}
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <title>The Real Life Guys Video-Zeitstrahl</title>
+    <meta
+      name="description"
+      content="Ein Zeitstrahl aller Videos der YouTube-Kanäle."
+    />
+  </head>
+  <body class="min-h-screen antialiased">
+    <!-- Ambient gradient background -->
+    <div
+      class="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+      aria-hidden="true"
+    >
+      <div
+        class="absolute -top-40 left-1/2 h-96 w-[48rem] -translate-x-1/2 rounded-full bg-red-600/20 blur-[120px]"
+      >
+      </div>
+      <div
+        class="absolute top-1/3 -left-40 h-96 w-96 rounded-full bg-indigo-600/10 blur-[120px]"
+      >
+      </div>
+    </div>
+
+    <!-- Sticky year navigation rail (left edge) -->
+    <nav
+      id="year-rail"
+      class="fixed top-1/2 left-0 z-40 hidden -translate-y-1/2 lg:block"
+      aria-label="Zum Jahr springen"
+    >
+      <ul
+        class="flex max-h-[80vh] flex-col gap-0.5 overflow-y-auto py-2 pr-2 pl-3"
+      >
+        <li>
+          <button
+            type="button"
+            id="rail-top"
+            class="year-link group flex w-full items-center gap-2 py-1 text-left"
+            aria-label="Zu den neuesten scrollen"
+          >
+            <span class="flex w-5 justify-center">
+              <svg
+                class="h-3 w-3 text-white/25 transition-colors duration-300 group-hover:text-red-400"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"><path d="M12 4 20 20 4 20z"></path></svg
+              >
+            </span>
+            <span
+              class="year-label text-xs font-medium text-slate-500 opacity-0 transition-all duration-300 group-hover:text-white group-hover:opacity-100"
+            >
+              Heute
+            </span>
+          </button>
+        </li>
+        {
+          years.map((year) => (
+            <li>
+              <button
+                type="button"
+                class="year-link group flex w-full items-center gap-2 py-1 text-left"
+                data-year={year}
+                aria-label={`Zu ${year} springen`}
+              >
+                <span class="year-tick h-0.5 rounded-full bg-white/25 transition-all duration-300 group-hover:bg-red-400" />
+                <span class="year-label text-xs font-medium text-slate-500 opacity-0 transition-all duration-300 group-hover:text-white group-hover:opacity-100">
+                  {year}
+                </span>
+              </button>
+            </li>
+          ))
+        }
+        <li>
+          <button
+            type="button"
+            id="rail-bottom"
+            class="year-link group flex w-full items-center gap-2 py-1 text-left"
+            aria-label="Zu den ältesten scrollen"
+          >
+            <span class="flex w-5 justify-center">
+              <svg
+                class="h-3 w-3 text-white/25 transition-colors duration-300 group-hover:text-red-400"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"><path d="M12 20 4 4 20 4z"></path></svg
+              >
+            </span>
+            <span
+              class="year-label text-xs font-medium text-slate-500 opacity-0 transition-all duration-300 group-hover:text-white group-hover:opacity-100"
+            >
+              Erstes
+            </span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Header -->
+    <header class="border-b border-white/5 backdrop-blur-sm">
+      <div class="mx-auto max-w-3xl px-6 py-10 sm:py-14">
+        <div class="flex items-center gap-3 text-sm text-red-400">
+          <svg
+            class="h-6 w-6"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.3 31.3 0 0 0 0 12a31.3 31.3 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.3 31.3 0 0 0 24 12a31.3 31.3 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.2 3.6-6.2 3.6Z"
+            ></path>
+          </svg>
+          <span class="font-medium tracking-wide uppercase"
+            >The Real Life Guys YouTube-Zeitstrahl</span
+          >
+        </div>
+        <h1
+          class="mt-4 text-4xl font-extrabold tracking-tight text-white sm:text-5xl"
+        >
+          Alle Videos, in Reihenfolge
+        </h1>
+        <p class="mt-3 max-w-xl text-slate-400">
+          Ein chronologischer Zeitstrahl aller
+          <span class="font-semibold text-white">{totalVideoCount}</span> Videos aus
+          {channels.length}
+          {channels.length === 1 ? 'Kanal' : 'Kanälen'}, neueste zuerst.
+        </p>
+
+        <!-- Channel filter -->
+        <div
+          id="channel-filter"
+          class="mt-6 flex flex-wrap items-center gap-2"
+          role="group"
+          aria-label="Nach Kanal filtern"
+        >
+          {
+            channels.map((c) => (
+              <button
+                type="button"
+                class="channel-chip is-active inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-white/30"
+                data-channel-id={c.id}
+                style={`--chip-color:${c.color}`}
+                aria-pressed="true"
+              >
+                <span
+                  class="chip-dot h-2.5 w-2.5 rounded-full"
+                  style={`background:${c.color}`}
+                />
+                <span>{c.title}</span>
+                <span class="text-xs text-slate-500">{c.videoCount}</span>
+              </button>
+            ))
+          }
+        </div>
+      </div>
+    </header>
+
+    <!-- Mobile year navigation (horizontal, sticky) — desktop uses #year-rail -->
+    <nav
+      id="year-bar"
+      class="sticky top-0 z-40 border-b border-white/5 bg-[#0b0f19]/85 backdrop-blur-sm lg:hidden"
+      aria-label="Zum Jahr springen"
+    >
+      <div class="year-bar-scroll flex gap-2 overflow-x-auto px-4 py-3">
+        <button
+          type="button"
+          id="bar-top"
+          class="year-chip-btn shrink-0 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-slate-300"
+        >
+          Heute
+        </button>
+        {
+          years.map((year) => (
+            <button
+              type="button"
+              class="year-link year-chip-btn shrink-0 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-slate-300"
+              data-year={year}
+              aria-label={`Zu ${year} springen`}
+            >
+              {year}
+            </button>
+          ))
+        }
+      </div>
+    </nav>
+
+    <!-- Timeline -->
+    <main class="mx-auto max-w-3xl px-6 pb-24">
+      <ol id="timeline" class="relative border-l border-white/10 pl-6 sm:pl-8">
+      </ol>
+
+      <!-- Loading sentinel -->
+      <div id="sentinel" class="flex justify-center py-10">
+        <div
+          id="spinner"
+          class="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-red-500"
+        >
+        </div>
+        <p id="end-message" class="hidden text-sm text-slate-500">
+          Das ist der Anfang — du hast das erste Video erreicht.
+        </p>
+      </div>
+    </main>
+
+    <script
+      type="application/json"
+      id="channels-data"
+      set:html={JSON.stringify(channels)}
+    />
+
+    <footer class="border-t border-white/5">
+      <div
+        class="mx-auto max-w-3xl px-6 py-8 text-center text-sm text-slate-600"
+      >
+        Erstellt von <a
+          href="https://www.youtube.com/@daniel-blaser-berg"
+          class="text-slate-400 hover:text-white"
+          target="_blank"
+          rel="noopener noreferrer">@daniel-blaser-berg</a
+        > und etwas KI · {totalVideoCount} Videos
+      </div>
+    </footer>
+
+    <script>
+      type Video = {
+        video_id: string;
+        title: string;
+        published_at: string;
+        thumbnail: string;
+        url: string;
+      };
+
+      type ChannelMeta = {
+        id: string;
+        title: string;
+        videoCount: number;
+        pageCount: number;
+        years: number[];
+        color: string;
+      };
+
+      type ChState = {
+        meta: ChannelMeta;
+        nextPage: number;
+        buffer: Video[];
+        loading: Promise<void> | null;
+      };
+
+      const timeline = document.getElementById('timeline') as HTMLElement;
+      const sentinel = document.getElementById('sentinel') as HTMLElement;
+      const spinner = document.getElementById('spinner') as HTMLElement;
+      const endMessage = document.getElementById('end-message') as HTMLElement;
+
+      const channels: ChannelMeta[] = JSON.parse(
+        document.getElementById('channels-data')?.textContent || '[]'
+      );
+      const multiChannel = channels.length > 1;
+
+      // Active channel ids (all on by default) + per-channel paging state.
+      const active = new Set(channels.map((c) => c.id));
+      const states = new Map<string, ChState>(
+        channels.map((c) => [
+          c.id,
+          { meta: c, nextPage: c.pageCount, buffer: [], loading: null },
+        ])
+      );
+
+      let renderedYear: number | null = null;
+      let exhausted = false;
+      let batchInflight: Promise<void> | null = null;
+
+      const dateFmt = new Intl.DateTimeFormat('de-DE', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+
+      function activeStates(): ChState[] {
+        return channels
+          .filter((c) => active.has(c.id))
+          .map((c) => states.get(c.id)!);
+      }
+
+      function yearHeader(year: number): HTMLLIElement {
+        const li = document.createElement('li');
+        li.id = `year-${year}`;
+        li.dataset.year = String(year);
+        li.className = 'year-anchor -ml-6 sm:-ml-8 mb-6 mt-10 first:mt-0';
+        li.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="grid h-12 w-12 place-items-center rounded-full bg-slate-800 text-sm font-bold text-white ring-4 ring-[#0b0f19]">${year}</span>
+          </div>`;
+        yearObserver.observe(li);
+        return li;
+      }
+
+      function videoCard(video: Video, meta: ChannelMeta): HTMLLIElement {
+        const li = document.createElement('li');
+        li.className = 'group relative mb-8';
+
+        // Timeline dot (colored per channel)
+        const dot = document.createElement('span');
+        dot.className =
+          'tl-dot absolute -left-[calc(0.375rem+7px)] sm:-left-[calc(0.5rem+7px)] top-6 h-3.5 w-3.5 rounded-full border-2 bg-[#0b0f19] transition';
+        dot.style.setProperty('--dot', meta.color);
+        li.appendChild(dot);
+
+        const date = new Date(video.published_at);
+        const a = document.createElement('a');
+        a.href = video.url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.className =
+          'block overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.06]';
+
+        const channelBadge = multiChannel
+          ? `<span class="inline-flex items-center gap-1.5 text-xs font-medium" style="color:${meta.color}">
+               <span class="h-2 w-2 rounded-full" style="background:${meta.color}"></span>${escapeHtml(meta.title)}
+             </span>
+             <span class="text-slate-600">·</span>`
+          : '';
+
+        a.innerHTML = `
+          <div class="relative aspect-video overflow-hidden bg-slate-900">
+            <img
+              src="${video.thumbnail}"
+              alt=""
+              loading="lazy"
+              decoding="async"
+              class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+              onerror="this.style.display='none'"
+            />
+            <div class="absolute inset-0 grid place-items-center opacity-0 transition group-hover:opacity-100">
+              <span class="grid h-14 w-14 place-items-center rounded-full bg-red-600/90 shadow-lg">
+                <svg class="h-6 w-6 translate-x-0.5 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              </span>
+            </div>
+          </div>
+          <div class="p-4 sm:p-5">
+            <div class="flex flex-wrap items-center gap-2">
+              ${channelBadge}
+              <time class="text-xs font-medium uppercase tracking-wide ${
+                multiChannel ? 'text-slate-400' : 'text-red-400'
+              }">${dateFmt.format(date)}</time>
+            </div>
+            <h3 class="mt-1.5 text-base font-semibold leading-snug text-white sm:text-lg">${escapeHtml(video.title)}</h3>
+          </div>`;
+
+        li.appendChild(a);
+        return li;
+      }
+
+      function escapeHtml(str: string): string {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      function renderVideo(video: Video, meta: ChannelMeta) {
+        const year = new Date(video.published_at).getFullYear();
+        if (year !== renderedYear) {
+          renderedYear = year;
+          timeline.appendChild(yearHeader(year));
+        }
+        timeline.appendChild(videoCard(video, meta));
+      }
+
+      // Load the next (older) page for a channel into its buffer, newest-first.
+      async function ensureBuffer(st: ChState) {
+        if (st.buffer.length || st.nextPage < 1) return;
+        if (st.loading) return st.loading;
+        st.loading = (async () => {
+          try {
+            const res = await fetch(
+              `${import.meta.env.BASE_URL.replace(/\/$/, '')}/videos/${st.meta.id}/page-${st.nextPage}.json`
+            );
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            st.buffer = [...(data.videos ?? [])].reverse();
+            st.nextPage -= 1;
+          } catch (err) {
+            console.error('Failed to load', st.meta.id, st.nextPage, err);
+            st.nextPage = 0;
+          } finally {
+            st.loading = null;
+          }
+        })();
+        return st.loading;
+      }
+
+      // Pick the globally newest unrendered video across all active channels.
+      async function nextVideo(): Promise<{
+        video: Video;
+        meta: ChannelMeta;
+      } | null> {
+        const sts = activeStates();
+        await Promise.all(sts.map(ensureBuffer));
+        let best: ChState | null = null;
+        for (const st of sts) {
+          if (!st.buffer.length) continue;
+          if (
+            !best ||
+            st.buffer[0].published_at > best.buffer[0].published_at
+          ) {
+            best = st;
+          }
+        }
+        if (!best) return null;
+        return { video: best.buffer.shift()!, meta: best.meta };
+      }
+
+      async function loadBatch(count = 24) {
+        if (batchInflight) return batchInflight;
+        batchInflight = (async () => {
+          let n = 0;
+          while (n < count) {
+            const next = await nextVideo();
+            if (!next) {
+              finish();
+              break;
+            }
+            renderVideo(next.video, next.meta);
+            n += 1;
+          }
+        })();
+        try {
+          await batchInflight;
+        } finally {
+          batchInflight = null;
+        }
+      }
+
+      function finish() {
+        exhausted = true;
+        observer.disconnect();
+        spinner.classList.add('hidden');
+        endMessage.classList.remove('hidden');
+      }
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((e) => e.isIntersecting)) loadBatch();
+        },
+        { rootMargin: '600px 0px' }
+      );
+
+      // --- Year rail navigation -------------------------------------------
+      const yearLinks = Array.from(
+        document.querySelectorAll<HTMLButtonElement>('.year-link[data-year]')
+      );
+
+      let currentActiveYear: number | null = null;
+      function setActiveYear(year: number | null) {
+        const changed = year !== currentActiveYear;
+        currentActiveYear = year;
+        for (const link of yearLinks) {
+          const isActive = Number(link.dataset.year) === year;
+          link.classList.toggle('is-active', isActive);
+          // Keep the active chip visible in the mobile horizontal bar.
+          if (changed && isActive && link.closest('#year-bar')) {
+            link.scrollIntoView({ block: 'nearest', inline: 'center' });
+          }
+        }
+      }
+
+      function availableYears(): Set<number> {
+        const set = new Set<number>();
+        for (const st of activeStates()) {
+          for (const y of st.meta.years) set.add(y);
+        }
+        return set;
+      }
+
+      // Dim rail years that no active channel contains.
+      function updateRail() {
+        const avail = availableYears();
+        for (const link of yearLinks) {
+          link.classList.toggle(
+            'is-disabled',
+            !avail.has(Number(link.dataset.year))
+          );
+        }
+      }
+
+      // Highlight the year header currently nearest the top of the viewport.
+      const yearObserver = new IntersectionObserver(
+        () => {
+          let activeYear: number | null = null;
+          let smallestTop = Infinity;
+          for (const el of document.querySelectorAll<HTMLElement>(
+            '.year-anchor'
+          )) {
+            const top = el.getBoundingClientRect().top;
+            if (top <= 120 && top < smallestTop) {
+              smallestTop = top;
+              activeYear = Number(el.dataset.year);
+            }
+          }
+          if (activeYear !== null) setActiveYear(activeYear);
+        },
+        { rootMargin: '-10% 0px -70% 0px', threshold: [0, 1] }
+      );
+
+      async function goToYear(year: number) {
+        if (!availableYears().has(year)) return;
+        let target = document.getElementById(`year-${year}`);
+        // Keep loading batches until the target year appears (or all loaded).
+        while (!target && !exhausted) {
+          await loadBatch();
+          target = document.getElementById(`year-${year}`);
+        }
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          setActiveYear(year);
+        }
+      }
+
+      for (const link of yearLinks) {
+        link.addEventListener('click', () => {
+          const year = Number(link.dataset.year);
+          if (!Number.isNaN(year)) goToYear(year);
+        });
+      }
+
+      // Jump to the very top (newest video).
+      document.getElementById('rail-top')?.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+      document.getElementById('bar-top')?.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+
+      // Jump to the very end (oldest video) — load everything first.
+      document
+        .getElementById('rail-bottom')
+        ?.addEventListener('click', async () => {
+          while (!exhausted) {
+            await loadBatch();
+          }
+          window.scrollTo({
+            top: document.body.scrollHeight,
+            behavior: 'smooth',
+          });
+        });
+
+      // --- Channel filter --------------------------------------------------
+      function restart() {
+        for (const st of states.values()) {
+          st.nextPage = st.meta.pageCount;
+          st.buffer = [];
+          st.loading = null;
+        }
+        renderedYear = null;
+        exhausted = false;
+        timeline.innerHTML = '';
+        spinner.classList.remove('hidden');
+        endMessage.classList.add('hidden');
+        observer.disconnect();
+        setActiveYear(null);
+        updateRail();
+        loadBatch().then(() => {
+          if (!exhausted) observer.observe(sentinel);
+        });
+      }
+
+      const chips = Array.from(
+        document.querySelectorAll<HTMLButtonElement>('.channel-chip')
+      );
+      for (const chip of chips) {
+        chip.addEventListener('click', () => {
+          const id = chip.dataset.channelId!;
+          if (active.has(id)) {
+            if (active.size === 1) return; // keep at least one channel on
+            active.delete(id);
+            chip.classList.remove('is-active');
+            chip.setAttribute('aria-pressed', 'false');
+          } else {
+            active.add(id);
+            chip.classList.add('is-active');
+            chip.setAttribute('aria-pressed', 'true');
+          }
+          restart();
+        });
+      }
+
+      // Kick things off.
+      updateRail();
+      if (channels.length === 0) {
+        finish();
+      } else {
+        loadBatch().then(() => {
+          if (!exhausted) observer.observe(sentinel);
+        });
+      }
+    </script>
+  </body>
+</html>
