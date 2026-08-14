@@ -53,6 +53,32 @@ export class YouTubeClient {
     return videos;
   }
 
+  // Fetch view/like/comment counts for the given video IDs. The Data API's
+  // `videos.list` accepts up to 50 IDs per request, so we batch accordingly.
+  async getVideoStatistics(videoIds) {
+    const stats = new Map();
+    const ids = videoIds.filter(Boolean);
+
+    for (let start = 0; start < ids.length; start += 50) {
+      const batch = ids.slice(start, start + 50);
+      const data = await this.#get('videos', {
+        part: 'statistics',
+        id: batch.join(','),
+        maxResults: '50',
+      });
+      for (const item of data.items ?? []) {
+        const s = item.statistics ?? {};
+        stats.set(item.id, {
+          view_count: toCount(s.viewCount),
+          like_count: toCount(s.likeCount),
+          comment_count: toCount(s.commentCount),
+        });
+      }
+    }
+
+    return stats;
+  }
+
   async storeChannelVideos(
     channelId,
     videos,
@@ -66,6 +92,26 @@ export class YouTubeClient {
     await mkdir(baseDir, { recursive: true });
 
     const compact = videos.map(compactVideo);
+
+    const stats = await this.getVideoStatistics(
+      compact.map((video) => video.video_id)
+    );
+    for (const video of compact) {
+      const s = stats.get(video.video_id);
+      video.view_count = s?.view_count ?? null;
+      video.like_count = s?.like_count ?? null;
+      video.comment_count = s?.comment_count ?? null;
+    }
+
+    const totals = compact.reduce(
+      (acc, video) => {
+        acc.view_count += video.view_count ?? 0;
+        acc.like_count += video.like_count ?? 0;
+        acc.comment_count += video.comment_count ?? 0;
+        return acc;
+      },
+      { view_count: 0, like_count: 0, comment_count: 0 }
+    );
     const pageCount = Math.ceil(compact.length / pageSize);
 
     for (let page = 1; page <= pageCount; page += 1) {
@@ -97,6 +143,10 @@ export class YouTubeClient {
           video_count: compact.length,
           page_count: pageCount,
           page_size: pageSize,
+          total_view_count: totals.view_count,
+          total_like_count: totals.like_count,
+          total_comment_count: totals.comment_count,
+          fetched_at: new Date().toISOString(),
         },
         null,
         2
@@ -105,6 +155,14 @@ export class YouTubeClient {
 
     return baseDir;
   }
+}
+
+// Parse a statistics counter string into a number; missing values (e.g. hidden
+// like counts) become null.
+function toCount(value) {
+  if (value == null) return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
 }
 
 // Actual upload date; fall back to playlist add date.

@@ -4,5 +4,9 @@
   "order": 3,
   "video_count": 101,
   "page_count": 3,
-  "page_size": 50
+  "page_size": 50,
+  "total_view_count": 52967705,
+  "total_like_count": 2233341,
+  "total_comment_count": 175917,
+  "fetched_at": "2026-08-14T14:43:40.151Z"
 }

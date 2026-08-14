@@ -2,7 +2,11 @@
   "channel_id": "UCn0ITRHWS64_zRz5WWeQBkQ",
   "channel_title": "The Real Life Guys",
   "order": 0,
-  "video_count": 406,
+  "video_count": 407,
   "page_count": 9,
-  "page_size": 50
+  "page_size": 50,
+  "total_view_count": 499832663,
+  "total_like_count": 12012774,
+  "total_comment_count": 466577,
+  "fetched_at": "2026-08-14T14:43:38.090Z"
 }
