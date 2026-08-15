@@ -14,6 +14,7 @@ type TopVideo = {
   view_count: number;
   like_count: number;
   comment_count: number;
+  thumbnail: string;
   url: string;
 };
 
@@ -64,10 +65,10 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <title>Top 20 Videos · The Real Life Guys Zeitstrahl</title>
+    <title>Top 50 Videos · The Real Life Guys Zeitstrahl</title>
     <meta
       name="description"
-      content="Die 20 meistgesehenen Videos der Real Life Guys Kanäle."
+      content="Die 50 meistgesehenen Videos der Real Life Guys Kanäle."
     />
   </head>
   <body class="min-h-screen antialiased">
@@ -99,10 +100,10 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
             >Zeitstrahl</a
           >
           <a
-            href={`${base}/top20`}
+            href={`${base}/statistics`}
             aria-current="page"
             class="rounded-full bg-white/10 px-4 py-1.5 font-medium text-white"
-            >Top 20</a
+            >Aufrufe</a
           >
         </nav>
         <div class="flex items-center gap-3 text-sm text-red-400">
@@ -123,10 +124,10 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         <h1
           class="mt-4 text-4xl font-extrabold tracking-tight text-white sm:text-5xl"
         >
-          Top 20 nach Aufrufen
+          Top 50 nach Aufrufen
         </h1>
         <p class="mt-3 max-w-xl text-slate-400">
-          Die 20 meistgesehenen Videos über alle Kanäle hinweg.
+          Die 50 meistgesehenen Videos über alle Kanäle hinweg.
         </p>
         {
           generatedLabel && (
@@ -141,21 +142,40 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     <!-- Table -->
     <main class="mx-auto max-w-3xl px-6 py-10 pb-24">
       <div class="overflow-x-auto rounded-2xl border border-white/10">
-        <table class="w-full min-w-[520px] border-collapse text-left text-sm">
+        <table class="w-full border-collapse text-left text-sm">
           <thead>
             <tr class="border-b border-white/10 text-xs uppercase tracking-wide text-slate-400">
               <th class="px-4 py-3 font-semibold">#</th>
+              <th class="px-2 py-3 font-semibold">Video</th>
               <th class="px-4 py-3 font-semibold">Titel</th>
-              <th class="px-4 py-3 font-semibold">Kanal</th>
-              <th class="px-4 py-3 text-right font-semibold">Aufrufe</th>
             </tr>
           </thead>
           <tbody>
             {
               topVideos.map((video, i) => (
                 <tr class="border-b border-white/5 transition last:border-0 hover:bg-white/[0.03]">
-                  <td class="px-4 py-3 font-semibold text-slate-500 tabular-nums">
+                  <td class="px-4 py-3 align-top font-semibold text-slate-500 tabular-nums">
                     {i + 1}
+                  </td>
+                  <td class="px-2 py-3 align-top">
+                    <a
+                      href={video.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="block"
+                      tabindex="-1"
+                      aria-hidden="true"
+                    >
+                      <img
+                        src={video.thumbnail}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        width="96"
+                        height="54"
+                        class="h-[54px] w-24 rounded-md object-cover ring-1 ring-white/10"
+                      />
+                    </a>
                   </td>
                   <td class="px-4 py-3">
                     <a
@@ -166,21 +186,12 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
                     >
                       {video.title}
                     </a>
-                    <span class="mt-0.5 block text-xs text-slate-500 tabular-nums">
-                      {dateFmt.format(new Date(video.published_at))}
-                    </span>
-                  </td>
-                  <td class="px-4 py-3 whitespace-nowrap text-slate-400">
-                    {video.channel}
-                  </td>
-                  <td class="px-4 py-3 text-right tabular-nums">
-                    <span class="font-medium text-white">
-                      {numberFmt.format(video.view_count)}
-                    </span>
                     <span class="mt-0.5 block text-xs text-slate-500">
-                      {numberFmt.format(video.like_count)} Likes
+                      {video.channel}, {dateFmt.format(new Date(video.published_at))}
                     </span>
-                    <span class="block text-xs text-slate-500">
+                    <span class="mt-0.5 block text-xs text-slate-500 tabular-nums">
+                      {numberFmt.format(video.view_count)} Aufrufe,{' '}
+                      {numberFmt.format(video.like_count)} Likes,{' '}
                       {numberFmt.format(video.comment_count)} Kommentare
                     </span>
                   </td>

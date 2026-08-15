@@ -20,7 +20,7 @@ await cp(source, dest, { recursive: true });
 
 console.log(`Synced video data -> ${dest}`);
 
-// Build a statistics.json with the 20 most-viewed videos across all channels.
+// Build a statistics.json with the 50 most-viewed videos across all channels.
 const entries = await readdir(source, { withFileTypes: true });
 const videos = [];
 for (const entry of entries) {
@@ -43,6 +43,7 @@ for (const entry of entries) {
         view_count: video.view_count ?? 0,
         like_count: video.like_count ?? 0,
         comment_count: video.comment_count ?? 0,
+        thumbnail: video.thumbnail,
         url: video.url,
       });
     }
@@ -51,7 +52,7 @@ for (const entry of entries) {
 
 const topVideos = videos
   .sort((a, b) => b.view_count - a.view_count)
-  .slice(0, 20);
+  .slice(0, 50);
 
 const statisticsPath = resolve(dest, 'statistics.json');
 await writeFile(
