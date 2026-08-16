@@ -52,6 +52,20 @@ async function main() {
     console.log(
       `Stored ${videos.length} videos for "${info.title}" (${channel}) in ${outputPath}`
     );
+
+    try {
+      const playlists = await client.getChannelPlaylists(channel);
+      const { playlistCount } = await client.storeChannelPlaylists(
+        channel,
+        playlists,
+        { title: info.title }
+      );
+      console.log(
+        `Stored ${playlistCount} playlists for "${info.title}" (${channel}).`
+      );
+    } catch (err) {
+      console.error(`Failed to fetch playlists for ${channel}:`, err.message);
+    }
   }
 }
 

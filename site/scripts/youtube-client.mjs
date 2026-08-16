@@ -32,8 +32,9 @@ export class YouTubeClient {
     };
   }
 
-  async getUploadedVideos(uploadsPlaylistId) {
-    if (!uploadsPlaylistId) return [];
+  // Fetch every item of a playlist, following pagination.
+  async #fetchPlaylistItems(playlistId) {
+    if (!playlistId) return [];
 
     const videos = [];
     let pageToken;
@@ -41,7 +42,7 @@ export class YouTubeClient {
     do {
       const data = await this.#get('playlistItems', {
         part: 'snippet,contentDetails,status',
-        playlistId: uploadsPlaylistId,
+        playlistId,
         maxResults: '50',
         ...(pageToken ? { pageToken } : {}),
       });
@@ -49,8 +50,32 @@ export class YouTubeClient {
       pageToken = data.nextPageToken;
     } while (pageToken);
 
+    return videos;
+  }
+
+  async getUploadedVideos(uploadsPlaylistId) {
+    const videos = await this.#fetchPlaylistItems(uploadsPlaylistId);
     videos.sort((a, b) => uploadDate(a).localeCompare(uploadDate(b)));
     return videos;
+  }
+
+  // List all public playlists created by a channel.
+  async getChannelPlaylists(channelId) {
+    const playlists = [];
+    let pageToken;
+
+    do {
+      const data = await this.#get('playlists', {
+        part: 'snippet,contentDetails',
+        channelId,
+        maxResults: '50',
+        ...(pageToken ? { pageToken } : {}),
+      });
+      playlists.push(...(data.items ?? []));
+      pageToken = data.nextPageToken;
+    } while (pageToken);
+
+    return playlists;
   }
 
   // Fetch view/like/comment counts for the given video IDs. The Data API's
@@ -154,6 +179,98 @@ export class YouTubeClient {
     );
 
     return baseDir;
+  }
+
+  // Fetch every playlist of a channel and write one JSON file per playlist
+  // (with full compact video data + statistics) plus an index of all series.
+  async storeChannelPlaylists(
+    channelId,
+    playlists,
+    { title, minVideos = 1, outputDir } = {}
+  ) {
+    const baseDir = resolve(
+      outputDir ?? resolve(import.meta.dirname, '../data/videos'),
+      channelId,
+      'playlists'
+    );
+    await rm(baseDir, { recursive: true, force: true });
+    await mkdir(baseDir, { recursive: true });
+
+    const summaries = [];
+
+    for (const [order, playlist] of playlists.entries()) {
+      const playlistId = playlist.id;
+      const items = await this.#fetchPlaylistItems(playlistId);
+      const compact = items.map(compactVideo).filter((v) => v.video_id);
+      if (compact.length < minVideos) continue;
+
+      const stats = await this.getVideoStatistics(
+        compact.map((v) => v.video_id)
+      );
+      for (const video of compact) {
+        const s = stats.get(video.video_id);
+        video.view_count = s?.view_count ?? null;
+        video.like_count = s?.like_count ?? null;
+        video.comment_count = s?.comment_count ?? null;
+      }
+
+      const snippet = playlist.snippet ?? {};
+      const thumbnails = snippet.thumbnails ?? {};
+      const bestThumbnail =
+        thumbnails.maxres ??
+        thumbnails.standard ??
+        thumbnails.high ??
+        thumbnails.medium ??
+        thumbnails.default ??
+        {};
+      const thumbnail = bestThumbnail.url ?? compact[0]?.thumbnail ?? null;
+
+      await writeFile(
+        resolve(baseDir, `${playlistId}.json`),
+        JSON.stringify(
+          {
+            playlist_id: playlistId,
+            channel_id: channelId,
+            channel_title: title ?? channelId,
+            title: snippet.title ?? playlistId,
+            description: snippet.description ?? '',
+            video_count: compact.length,
+            thumbnail,
+            videos: compact,
+          },
+          null,
+          2
+        )
+      );
+
+      summaries.push({
+        playlist_id: playlistId,
+        title: snippet.title ?? playlistId,
+        description: snippet.description ?? '',
+        video_count: compact.length,
+        thumbnail,
+        order,
+      });
+    }
+
+    summaries.sort((a, b) => a.title.localeCompare(b.title, 'de'));
+
+    await writeFile(
+      resolve(baseDir, 'index.json'),
+      JSON.stringify(
+        {
+          channel_id: channelId,
+          channel_title: title ?? channelId,
+          playlist_count: summaries.length,
+          playlists: summaries,
+          fetched_at: new Date().toISOString(),
+        },
+        null,
+        2
+      )
+    );
+
+    return { baseDir, playlistCount: summaries.length };
   }
 }
 

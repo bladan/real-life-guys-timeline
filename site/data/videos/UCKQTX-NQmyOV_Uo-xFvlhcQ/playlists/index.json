@@ -1,0 +1,32 @@
+{
+  "channel_id": "UCKQTX-NQmyOV_Uo-xFvlhcQ",
+  "channel_title": "Real Life Guys Vlogs",
+  "playlist_count": 3,
+  "playlists": [
+    {
+      "playlist_id": "PLBk6et9OJJwfwX3prh19NSz-s0ReOufQ2",
+      "title": "Community Fahrzeuge",
+      "description": "Die krassesten DIY Projekte von euch!",
+      "video_count": 5,
+      "thumbnail": "https://i.ytimg.com/vi/QRtPxbBH8ek/maxresdefault.jpg",
+      "order": 2
+    },
+    {
+      "playlist_id": "PLBk6et9OJJwcCp7ZfQxOyXJVb_gEMsPuv",
+      "title": "Q&A Videos",
+      "description": "Wir beantworten eure Fragen!",
+      "video_count": 8,
+      "thumbnail": "https://i.ytimg.com/vi/IjNPk9ogt8k/maxresdefault.jpg",
+      "order": 1
+    },
+    {
+      "playlist_id": "PLBk6et9OJJwfMDSB9ghopGBYqa91g-qgN",
+      "title": "Vlogs",
+      "description": "Unser Real Life",
+      "video_count": 41,
+      "thumbnail": "https://i.ytimg.com/vi/sdZE8hk9HUM/maxresdefault.jpg",
+      "order": 0
+    }
+  ],
+  "fetched_at": "2026-08-16T15:45:24.183Z"
+}

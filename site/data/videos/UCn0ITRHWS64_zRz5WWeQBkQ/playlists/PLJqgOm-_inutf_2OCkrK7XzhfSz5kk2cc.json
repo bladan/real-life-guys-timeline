@@ -1,0 +1,31 @@
+{
+  "playlist_id": "PLJqgOm-_inutf_2OCkrK7XzhfSz5kk2cc",
+  "channel_id": "UCn0ITRHWS64_zRz5WWeQBkQ",
+  "channel_title": "The Real Life Guys",
+  "title": "unsere krasse Rakete",
+  "description": "",
+  "video_count": 2,
+  "thumbnail": "https://i.ytimg.com/vi/3BJ3_oWWzoM/maxresdefault.jpg",
+  "videos": [
+    {
+      "video_id": "3BJ3_oWWzoM",
+      "title": "Wie weit kann ein GASTANK fliegen?",
+      "published_at": "2021-10-22T14:00:01Z",
+      "thumbnail": "https://i.ytimg.com/vi/3BJ3_oWWzoM/maxresdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=3BJ3_oWWzoM",
+      "view_count": 742697,
+      "like_count": 29200,
+      "comment_count": 1197
+    },
+    {
+      "video_id": "zcDT6q6elXI",
+      "title": "Daniel FLIEGT auf der RAKETE!",
+      "published_at": "2021-12-13T17:36:38Z",
+      "thumbnail": "https://i.ytimg.com/vi/zcDT6q6elXI/maxresdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=zcDT6q6elXI",
+      "view_count": 773432,
+      "like_count": 28503,
+      "comment_count": 522
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "channel_id": "UCbQEgPpqplgaoiFiM6VocCg",
+  "channel_title": "Johannes Mickenbecker",
+  "playlist_count": 3,
+  "playlists": [
+    {
+      "playlist_id": "PLTPxX7fdxgt7BoZamWujd-K6yOEKGverd",
+      "title": "MISSION WOLF",
+      "description": "Ich versuche einen wildlebenden Wolf in Deutschland zu fotografieren",
+      "video_count": 6,
+      "thumbnail": "https://i.ytimg.com/vi/FNZuC-CxKcw/maxresdefault.jpg",
+      "order": 1
+    },
+    {
+      "playlist_id": "PLTPxX7fdxgt5DhFVLQtHOTdgvwKqrN76z",
+      "title": "Wildlife Fotografie",
+      "description": "",
+      "video_count": 6,
+      "thumbnail": "https://i.ytimg.com/vi/BA3cfFlLE1c/maxresdefault.jpg",
+      "order": 0
+    },
+    {
+      "playlist_id": "PLTPxX7fdxgt6ZLwpM3tWBtkReX7kYu6xP",
+      "title": "Wildlife Vlog",
+      "description": "",
+      "video_count": 10,
+      "thumbnail": "https://i.ytimg.com/vi/2kk1izH_4MU/maxresdefault.jpg",
+      "order": 2
+    }
+  ],
+  "fetched_at": "2026-08-16T15:45:25.312Z"
+}

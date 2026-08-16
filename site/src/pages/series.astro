@@ -1,0 +1,441 @@
+---
+import '../styles/global.css';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
+// Read all channels' playlist indexes at build time from the source data folder.
+const videosDir = resolve(process.cwd(), 'data/videos');
+const palette = ['#ef4444', '#38bdf8', '#34d399', '#f59e0b', '#a78bfa'];
+
+type PlaylistMeta = {
+  playlistId: string;
+  channelId: string;
+  channelTitle: string;
+  title: string;
+  description: string;
+  videoCount: number;
+  thumbnail: string | null;
+  color: string;
+};
+
+// Determine channel order (same logic as the timeline) so colors line up.
+const channelDirs = readdirSync(videosDir, { withFileTypes: true })
+  .filter((d) => d.isDirectory())
+  .map((d) => d.name)
+  .map((id) => {
+    const index = JSON.parse(
+      readFileSync(resolve(videosDir, id, 'index.json'), 'utf-8')
+    );
+    return {
+      id,
+      title: index.channel_title ?? id,
+      order: index.order ?? Number.MAX_SAFE_INTEGER,
+    };
+  })
+  .sort((a, b) => a.order - b.order);
+
+const channelColor = new Map<string, string>();
+channelDirs.forEach((c, i) => {
+  channelColor.set(c.id, palette[i % palette.length]);
+});
+
+const playlists: PlaylistMeta[] = [];
+for (const channel of channelDirs) {
+  const indexPath = resolve(videosDir, channel.id, 'playlists', 'index.json');
+  if (!existsSync(indexPath)) continue;
+  const index = JSON.parse(readFileSync(indexPath, 'utf-8'));
+  for (const pl of index.playlists ?? []) {
+    playlists.push({
+      playlistId: pl.playlist_id,
+      channelId: channel.id,
+      channelTitle: index.channel_title ?? channel.title,
+      title: pl.title,
+      description: pl.description ?? '',
+      videoCount: pl.video_count ?? 0,
+      thumbnail: pl.thumbnail ?? null,
+      color: channelColor.get(channel.id) ?? palette[0],
+    });
+  }
+}
+
+playlists.sort((a, b) => a.title.localeCompare(b.title, 'de'));
+
+const multiChannel = channelDirs.length > 1;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <title>Serien · The Real Life Guys Zeitstrahl</title>
+    <meta
+      name="description"
+      content="Die Videos der Real Life Guys nach Playlists / Serien gefiltert."
+    />
+  </head>
+  <body class="min-h-screen antialiased">
+    <!-- Ambient gradient background -->
+    <div
+      class="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+      aria-hidden="true"
+    >
+      <div
+        class="absolute -top-40 left-1/2 h-96 w-[48rem] -translate-x-1/2 rounded-full bg-red-600/20 blur-[120px]"
+      >
+      </div>
+      <div
+        class="absolute top-1/3 -left-40 h-96 w-96 rounded-full bg-indigo-600/10 blur-[120px]"
+      >
+      </div>
+    </div>
+
+    <!-- Header -->
+    <header class="border-b border-white/5 backdrop-blur-sm">
+      <div class="mx-auto max-w-3xl px-6 py-10 sm:py-14">
+        <nav
+          class="mb-8 flex items-center gap-2 text-sm"
+          aria-label="Hauptnavigation"
+        >
+          <a
+            href={`${base}/`}
+            class="rounded-full px-4 py-1.5 font-medium text-slate-400 transition hover:bg-white/5 hover:text-white"
+            >Zeitstrahl</a
+          >
+          <a
+            href={`${base}/series`}
+            aria-current="page"
+            class="rounded-full bg-white/10 px-4 py-1.5 font-medium text-white"
+            >Serien</a
+          >
+          <a
+            href={`${base}/statistics`}
+            class="rounded-full px-4 py-1.5 font-medium text-slate-400 transition hover:bg-white/5 hover:text-white"
+            >Top-Liste</a
+          >
+        </nav>
+        <div class="flex items-center gap-3 text-sm text-red-400">
+          <svg
+            class="h-6 w-6"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.3 31.3 0 0 0 0 12a31.3 31.3 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.3 31.3 0 0 0 24 12a31.3 31.3 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.2 3.6-6.2 3.6Z"
+            ></path>
+          </svg>
+          <span class="font-medium tracking-wide uppercase"
+            >The Real Life Guys YouTube-Zeitstrahl</span
+          >
+        </div>
+        <h1
+          class="mt-4 text-4xl font-extrabold tracking-tight text-white sm:text-5xl"
+        >
+          Serien &amp; Playlists
+        </h1>
+        <p class="mt-3 max-w-xl text-slate-400">
+          Wähle eine Playlist, um alle{' '}
+          <span class="font-semibold text-white">{playlists.length}</span>{' '}
+          Serien der Kanäle zu durchstöbern.
+        </p>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-3xl px-6 pb-24">
+      {
+        playlists.length === 0 ? (
+          <p class="mt-10 text-center text-sm text-slate-500">
+            Keine Playlists gefunden. Bitte zuerst{' '}
+            <code class="rounded bg-white/10 px-1.5 py-0.5">
+              npm run fetch-videos
+            </code>{' '}
+            ausführen.
+          </p>
+        ) : (
+          <>
+            <!-- Playlist selector -->
+            <section
+              id="playlist-picker"
+              class="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2"
+              aria-label="Serie auswählen"
+            >
+              {playlists.map((pl) => (
+                <button
+                  type="button"
+                  class="playlist-card group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-left transition hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.06]"
+                  data-playlist-id={pl.playlistId}
+                  data-channel-id={pl.channelId}
+                  style={`--pl-color:${pl.color}`}
+                  aria-pressed="false"
+                >
+                  <span class="relative aspect-video w-28 shrink-0 overflow-hidden rounded-lg bg-slate-900">
+                    {pl.thumbnail && (
+                      <img
+                        src={pl.thumbnail}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        class="h-full w-full object-cover"
+                        onerror="this.style.display='none'"
+                      />
+                    )}
+                  </span>
+                  <span class="min-w-0 flex-1">
+                    <span class="block truncate text-sm font-semibold text-white">
+                      {pl.title}
+                    </span>
+                    <span class="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-500">
+                      {multiChannel && (
+                        <span
+                          class="inline-flex items-center gap-1"
+                          style={`color:${pl.color}`}
+                        >
+                          <span
+                            class="h-2 w-2 rounded-full"
+                            style={`background:${pl.color}`}
+                          />
+                          {pl.channelTitle}
+                        </span>
+                      )}
+                      <span>{pl.videoCount} Videos</span>
+                    </span>
+                  </span>
+                </button>
+              ))}
+            </section>
+
+            <!-- Selected playlist videos -->
+            <section id="playlist-detail" class="mt-10 hidden">
+              <div class="mb-5 flex items-baseline justify-between gap-3">
+                <h2
+                  id="detail-title"
+                  class="text-xl font-bold text-white"
+                />
+                <span id="detail-count" class="text-sm text-slate-500" />
+              </div>
+              <p id="detail-description" class="mb-6 text-sm text-slate-400" />
+              <div
+                id="video-grid"
+                class="grid grid-cols-1 gap-4 sm:grid-cols-2"
+              />
+            </section>
+
+            <div id="detail-loading" class="mt-10 hidden justify-center py-10">
+              <div class="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-red-500" />
+            </div>
+
+            <p
+              id="detail-hint"
+              class="mt-10 text-center text-sm text-slate-500"
+            >
+              Wähle oben eine Serie aus.
+            </p>
+          </>
+        )
+      }
+    </main>
+
+    <footer class="border-t border-white/5">
+      <div
+        class="mx-auto max-w-3xl px-6 py-8 text-center text-sm text-slate-600"
+      >
+        Erstellt von <a
+          href="https://www.youtube.com/@daniel-blaser-berg"
+          class="text-slate-400 hover:text-white"
+          target="_blank"
+          rel="noopener noreferrer">@daniel-blaser-berg</a
+        > und etwas KI · <a
+          href="https://github.com/bladan/real-life-guys-timeline"
+          class="inline-flex align-middle items-center gap-1 text-slate-500 hover:text-slate-300 transition"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="GitHub Repository"
+        >
+          <svg
+            class="h-4 w-4"
+            viewBox="0 0 16 16"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+          </svg>
+          GITHUB Projektseite
+        </a>
+      </div>
+    </footer>
+
+    <script>
+      type Video = {
+        video_id: string;
+        title: string;
+        published_at: string;
+        thumbnail: string;
+        url: string;
+        view_count: number | null;
+        like_count: number | null;
+        comment_count: number | null;
+      };
+
+      const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+      const picker = document.getElementById('playlist-picker');
+      const detail = document.getElementById('playlist-detail');
+      const detailTitle = document.getElementById('detail-title');
+      const detailCount = document.getElementById('detail-count');
+      const detailDescription = document.getElementById('detail-description');
+      const grid = document.getElementById('video-grid');
+      const loading = document.getElementById('detail-loading');
+      const hint = document.getElementById('detail-hint');
+
+      const dateFmt = new Intl.DateTimeFormat('de-DE', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+      const countFmt = new Intl.NumberFormat('de-DE', {
+        notation: 'compact',
+        maximumFractionDigits: 1,
+      });
+
+      const cache = new Map<string, Video[]>();
+      let currentKey: string | null = null;
+
+      function escapeHtml(str: string): string {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      function statsRow(video: Video): string {
+        const icons = {
+          views:
+            '<svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>',
+          likes:
+            '<svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v11H4a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h3Zm0 0 4.5-7a2 2 0 0 1 3.7 1.3L14 8h5.3a2 2 0 0 1 2 2.4l-1.4 7A2 2 0 0 1 18 19H7"/></svg>',
+          comments:
+            '<svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-11.9 7.8L3 21l1.7-6.1A8.5 8.5 0 1 1 21 11.5Z"/></svg>',
+        };
+        const items: string[] = [];
+        const add = (icon: string, value: number | null, label: string) => {
+          if (value == null) return;
+          items.push(
+            `<span class="inline-flex items-center gap-1" title="${value.toLocaleString('de-DE')} ${label}">${icon}${countFmt.format(value)}</span>`
+          );
+        };
+        add(icons.views, video.view_count, 'Aufrufe');
+        add(icons.likes, video.like_count, 'Likes');
+        add(icons.comments, video.comment_count, 'Kommentare');
+        if (!items.length) return '';
+        return `<div class="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-medium text-slate-400">${items.join('')}</div>`;
+      }
+
+      function videoCard(video: Video): string {
+        const date = new Date(video.published_at);
+        return `
+          <a href="${video.url}" target="_blank" rel="noopener noreferrer"
+             class="group block overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.06]">
+            <div class="relative aspect-video overflow-hidden bg-slate-900">
+              <img src="${video.thumbnail}" alt="" loading="lazy" decoding="async"
+                   class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                   onerror="this.style.display='none'" />
+              <div class="absolute inset-0 grid place-items-center opacity-0 transition group-hover:opacity-100">
+                <span class="grid h-14 w-14 place-items-center rounded-full bg-red-600/90 shadow-lg">
+                  <svg class="h-6 w-6 translate-x-0.5 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                </span>
+              </div>
+            </div>
+            <div class="p-4">
+              <time class="text-xs font-medium uppercase tracking-wide text-slate-400">${dateFmt.format(date)}</time>
+              <h3 class="mt-1.5 text-base font-semibold leading-snug text-white">${escapeHtml(video.title)}</h3>
+              ${statsRow(video)}
+            </div>
+          </a>`;
+      }
+
+      async function selectPlaylist(button: HTMLButtonElement) {
+        const playlistId = button.dataset.playlistId!;
+        const channelId = button.dataset.channelId!;
+        const key = `${channelId}/${playlistId}`;
+        currentKey = key;
+
+        for (const b of picker!.querySelectorAll<HTMLButtonElement>(
+          '.playlist-card'
+        )) {
+          const active = b === button;
+          b.classList.toggle('is-active', active);
+          b.setAttribute('aria-pressed', active ? 'true' : 'false');
+        }
+
+        hint?.classList.add('hidden');
+        detail?.classList.add('hidden');
+        loading?.classList.remove('hidden');
+        loading?.classList.add('flex');
+
+        let videos = cache.get(key);
+        let title = button
+          .querySelector('.text-white')
+          ?.textContent?.trim();
+        let description = '';
+
+        if (!videos) {
+          try {
+            const res = await fetch(
+              `${base}/videos/${channelId}/playlists/${playlistId}.json`
+            );
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            videos = (data.videos ?? []) as Video[];
+            title = data.title ?? title;
+            description = data.description ?? '';
+            cache.set(key, videos);
+            button.dataset.description = description;
+            button.dataset.title = title ?? '';
+          } catch (err) {
+            console.error('Failed to load playlist', key, err);
+            loading?.classList.add('hidden');
+            loading?.classList.remove('flex');
+            hint!.textContent = 'Playlist konnte nicht geladen werden.';
+            hint?.classList.remove('hidden');
+            return;
+          }
+        } else {
+          title = button.dataset.title || title;
+          description = button.dataset.description || '';
+        }
+
+        // Guard against a newer selection finishing first.
+        if (currentKey !== key) return;
+
+        detailTitle!.textContent = title ?? '';
+        detailCount!.textContent = `${videos.length} Videos`;
+        if (description) {
+          detailDescription!.textContent = description;
+          detailDescription!.classList.remove('hidden');
+        } else {
+          detailDescription!.classList.add('hidden');
+        }
+        grid!.innerHTML = videos.map(videoCard).join('');
+
+        loading?.classList.add('hidden');
+        loading?.classList.remove('flex');
+        detail?.classList.remove('hidden');
+        detail?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      for (const button of picker?.querySelectorAll<HTMLButtonElement>(
+        '.playlist-card'
+      ) ?? []) {
+        button.addEventListener('click', () => selectPlaylist(button));
+      }
+    </script>
+  </body>
+</html>

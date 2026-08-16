@@ -79,6 +79,12 @@ body {
   opacity: 0.35;
 }
 
+/* Playlist selector cards */
+.playlist-card.is-active {
+  border-color: var(--pl-color);
+  background: color-mix(in srgb, var(--pl-color) 15%, transparent);
+}
+
 /* Offset scroll target so year headers aren't flush against the viewport top */
 .year-anchor {
   scroll-margin-top: 1.5rem;

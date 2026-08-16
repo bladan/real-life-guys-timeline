@@ -1,0 +1,31 @@
+{
+  "playlist_id": "PLHEP-WXNSx6Bm2GOp9M53GZz6lf4cjdBX",
+  "channel_id": "UCHTvyKiIWD-4iyD6udldjrg",
+  "channel_title": "Life Lion",
+  "title": "Musikvideos",
+  "description": "",
+  "video_count": 2,
+  "thumbnail": "https://i.ytimg.com/vi/1FGSB9Gtw54/maxresdefault.jpg",
+  "videos": [
+    {
+      "video_id": "1FGSB9Gtw54",
+      "title": "DAS WAHRE LEBEN | Song von Philipp & Johannes Mickenbecker & Samuel Harfst",
+      "published_at": "2023-12-01T18:24:23Z",
+      "thumbnail": "https://i.ytimg.com/vi/1FGSB9Gtw54/maxresdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=1FGSB9Gtw54",
+      "view_count": 168756,
+      "like_count": 6216,
+      "comment_count": 238
+    },
+    {
+      "video_id": "_OKojI3W5nU",
+      "title": "REAL LIFE (O’Bros) | Song für Philipp Mickenbecker ✞",
+      "published_at": "2021-06-20T14:00:11Z",
+      "thumbnail": "https://i.ytimg.com/vi/_OKojI3W5nU/maxresdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=_OKojI3W5nU",
+      "view_count": 3361969,
+      "like_count": 139578,
+      "comment_count": 6168
+    }
+  ]
+}

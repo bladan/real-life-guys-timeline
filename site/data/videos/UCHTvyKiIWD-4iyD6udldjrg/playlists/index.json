@@ -1,0 +1,64 @@
+{
+  "channel_id": "UCHTvyKiIWD-4iyD6udldjrg",
+  "channel_title": "Life Lion",
+  "playlist_count": 7,
+  "playlists": [
+    {
+      "playlist_id": "PLHEP-WXNSx6CTjXoCvWYdU3NZUrrBoS2h",
+      "title": "Interviews",
+      "description": "",
+      "video_count": 33,
+      "thumbnail": "https://i.ytimg.com/vi/J4q7ZzSEH-Q/maxresdefault.jpg",
+      "order": 4
+    },
+    {
+      "playlist_id": "PLHEP-WXNSx6CMD1L7zrt0rlTz4sNqivpH",
+      "title": "Meine Story",
+      "description": "",
+      "video_count": 1,
+      "thumbnail": "https://i.ytimg.com/vi/pbdtqooNLVk/maxresdefault.jpg",
+      "order": 2
+    },
+    {
+      "playlist_id": "PLHEP-WXNSx6Bm2GOp9M53GZz6lf4cjdBX",
+      "title": "Musikvideos",
+      "description": "",
+      "video_count": 2,
+      "thumbnail": "https://i.ytimg.com/vi/1FGSB9Gtw54/maxresdefault.jpg",
+      "order": 0
+    },
+    {
+      "playlist_id": "PLHEP-WXNSx6A5B43PUXg9TNWd7J4GXCTi",
+      "title": "Philipp Mickenbecker",
+      "description": "",
+      "video_count": 36,
+      "thumbnail": "https://i.ytimg.com/vi/bC4dUt_K5oU/maxresdefault.jpg",
+      "order": 6
+    },
+    {
+      "playlist_id": "PLHEP-WXNSx6AU2K3EDNst-dGE7hOF5lC7",
+      "title": "Reisevideos",
+      "description": "",
+      "video_count": 3,
+      "thumbnail": "https://i.ytimg.com/vi/FWnS65LzSto/maxresdefault.jpg",
+      "order": 5
+    },
+    {
+      "playlist_id": "PLHEP-WXNSx6C5EG_Z-u0ikGVQymM8GgMA",
+      "title": "Shorts",
+      "description": "",
+      "video_count": 30,
+      "thumbnail": "https://i.ytimg.com/vi/IhBC4wfBNoA/maxresdefault.jpg",
+      "order": 1
+    },
+    {
+      "playlist_id": "PLHEP-WXNSx6APiAjsspruht5C00eMenGx",
+      "title": "Wunder",
+      "description": "",
+      "video_count": 7,
+      "thumbnail": "https://i.ytimg.com/vi/KOHEaMN0SVQ/maxresdefault.jpg",
+      "order": 3
+    }
+  ],
+  "fetched_at": "2026-08-16T15:45:28.225Z"
+}

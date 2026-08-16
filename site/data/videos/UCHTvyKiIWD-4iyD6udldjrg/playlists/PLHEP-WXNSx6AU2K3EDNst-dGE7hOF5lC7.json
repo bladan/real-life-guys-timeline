@@ -1,0 +1,41 @@
+{
+  "playlist_id": "PLHEP-WXNSx6AU2K3EDNst-dGE7hOF5lC7",
+  "channel_id": "UCHTvyKiIWD-4iyD6udldjrg",
+  "channel_title": "Life Lion",
+  "title": "Reisevideos",
+  "description": "",
+  "video_count": 3,
+  "thumbnail": "https://i.ytimg.com/vi/FWnS65LzSto/maxresdefault.jpg",
+  "videos": [
+    {
+      "video_id": "FWnS65LzSto",
+      "title": "Ein bewegender Roadtrip",
+      "published_at": "2020-11-26T15:06:36Z",
+      "thumbnail": "https://i.ytimg.com/vi/FWnS65LzSto/maxresdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=FWnS65LzSto",
+      "view_count": 327321,
+      "like_count": 19762,
+      "comment_count": 1235
+    },
+    {
+      "video_id": "rVykWtG6Bkk",
+      "title": "Diese seltsamen Dinge sind in Island passiert",
+      "published_at": "2020-11-11T15:00:11Z",
+      "thumbnail": "https://i.ytimg.com/vi/rVykWtG6Bkk/maxresdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=rVykWtG6Bkk",
+      "view_count": 662727,
+      "like_count": 33425,
+      "comment_count": 1121
+    },
+    {
+      "video_id": "vjJ8RqvI7kc",
+      "title": "Wir campen bei -22 Grad! Schweden Roadtrip",
+      "published_at": "2021-01-20T15:00:19Z",
+      "thumbnail": "https://i.ytimg.com/vi/vjJ8RqvI7kc/maxresdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=vjJ8RqvI7kc",
+      "view_count": 243744,
+      "like_count": 11770,
+      "comment_count": 639
+    }
+  ]
+}
