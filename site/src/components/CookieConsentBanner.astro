@@ -1,0 +1,137 @@
+---
+const measurementId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
+---
+
+{
+  measurementId && (
+    <div
+      id="cookie-consent"
+      class="fixed inset-x-0 bottom-0 z-50 p-4"
+      role="dialog"
+      aria-live="polite"
+      aria-label="Cookie-Einwilligung"
+    >
+      <div class="mx-auto flex max-w-3xl flex-col gap-3 rounded-2xl border border-white/20 bg-[#101827]/95 p-4 shadow-2xl backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-5">
+        <p class="text-sm text-slate-200">
+          Wir verwenden Google Analytics, um die Nutzung der Website anonymisiert zu messen.
+          Du kannst zustimmen oder ablehnen.
+        </p>
+        <div class="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            id="cookie-decline"
+            data-consent-action="decline"
+            onclick="try{localStorage.setItem('rlg-ga-consent-v1','declined');}catch(e){} var el=document.getElementById('cookie-consent'); if(el){el.style.display='none';el.remove();}"
+            class="rounded-full border border-white/25 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/10"
+          >
+            Ablehnen
+          </button>
+          <button
+            type="button"
+            id="cookie-accept"
+            data-consent-action="accept"
+            onclick="try{localStorage.setItem('rlg-ga-consent-v1','accepted');}catch(e){} try{window.dispatchEvent(new Event('rlg:ga-consent-granted'));}catch(e){} var el=document.getElementById('cookie-consent'); if(el){el.style.display='none';el.remove();}"
+            class="rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-500"
+          >
+            Akzeptieren
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+{
+  measurementId && (
+    <script is:inline>
+      {`
+        (function () {
+          var CONSENT_KEY = 'rlg-ga-consent-v1';
+          var root = document.getElementById('cookie-consent');
+          if (!root) return;
+
+          function getStorageItem(key) {
+            try {
+              return window.localStorage.getItem(key);
+            } catch (_err) {
+              return null;
+            }
+          }
+
+          function setStorageItem(key, value) {
+            try {
+              window.localStorage.setItem(key, value);
+              return true;
+            } catch (_err) {
+              return false;
+            }
+          }
+
+          function hideBanner() {
+            root.classList.add('hidden');
+            root.setAttribute('hidden', '');
+            root.style.display = 'none';
+            root.remove();
+          }
+
+          function setConsent(value) {
+            setStorageItem(CONSENT_KEY, value);
+          }
+
+          var existing = getStorageItem(CONSENT_KEY);
+
+          if (existing === 'accepted' || existing === 'declined') {
+            hideBanner();
+            return;
+          }
+
+          function accept() {
+            setConsent('accepted');
+            window.dispatchEvent(new Event('rlg:ga-consent-granted'));
+            hideBanner();
+          }
+
+          function decline() {
+            setConsent('declined');
+            hideBanner();
+          }
+
+          var acceptBtn = document.getElementById('cookie-accept');
+          var declineBtn = document.getElementById('cookie-decline');
+          if (acceptBtn) {
+            acceptBtn.addEventListener('click', accept);
+          }
+
+          if (declineBtn) {
+            declineBtn.addEventListener('click', decline);
+          }
+
+          root.addEventListener('click', function (event) {
+            var target = event.target;
+            var targetElement =
+              target instanceof Element
+                ? target
+                : target && target.parentElement
+                  ? target.parentElement
+                  : null;
+            if (!targetElement) return;
+
+            var actionTarget = targetElement.closest('[data-consent-action]');
+            if (!actionTarget) return;
+
+            var action = actionTarget.getAttribute('data-consent-action');
+
+            if (action === 'accept') {
+              accept();
+              return;
+            }
+
+            if (action === 'decline') {
+              decline();
+            }
+          });
+        })();
+      `}
+    </script>
+  )
+}

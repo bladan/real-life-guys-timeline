@@ -1,0 +1,46 @@
+---
+const measurementId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
+---
+
+{
+  measurementId && (
+    <>
+      <script is:inline>
+        {`
+          (function () {
+            var CONSENT_KEY = 'rlg-ga-consent-v1';
+            var MEASUREMENT_ID = '${measurementId}';
+            var loaded = false;
+
+            function loadAnalytics() {
+              if (loaded || !MEASUREMENT_ID) return;
+              loaded = true;
+
+              var gaScript = document.createElement('script');
+              gaScript.async = true;
+              gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=' + MEASUREMENT_ID;
+              document.head.appendChild(gaScript);
+
+              window.dataLayer = window.dataLayer || [];
+              function gtag() { window.dataLayer.push(arguments); }
+              window.gtag = gtag;
+
+              gtag('js', new Date());
+              gtag('config', MEASUREMENT_ID, { anonymize_ip: true });
+            }
+
+            try {
+              if (window.localStorage.getItem(CONSENT_KEY) === 'accepted') {
+                loadAnalytics();
+              }
+            } catch (_err) {
+              // Ignore storage access errors; banner remains visible.
+            }
+
+            window.addEventListener('rlg:ga-consent-granted', loadAnalytics);
+          })();
+        `}
+      </script>
+    </>
+  )
+}

@@ -2,6 +2,8 @@
 import '../styles/global.css';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import GoogleAnalytics from '../components/GoogleAnalytics.astro';
+import CookieConsentBanner from '../components/CookieConsentBanner.astro';
 
 // Read the pre-generated statistics file (created by scripts/sync-data.mjs).
 const statsPath = resolve(process.cwd(), 'public/videos/statistics.json');
@@ -70,6 +72,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       name="description"
       content="Die 50 meistgesehenen Videos der Real Life Guys Kanäle."
     />
+    <GoogleAnalytics />
   </head>
   <body class="min-h-screen antialiased">
     <!-- Ambient gradient background -->
@@ -245,5 +248,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         </a>
       </div>
     </footer>
+
+    <CookieConsentBanner />
   </body>
 </html>
