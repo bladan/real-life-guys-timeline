@@ -46,7 +46,7 @@ Setze `YOUTUBE_API_KEY` und `YOUTUBE_CHANNELS` in `site/.env` oder in deiner She
 
 Optional kannst du Google Analytics 4 aktivieren, indem du `PUBLIC_GA_MEASUREMENT_ID` setzt (z.B. `G-XXXXXXXXXX`).
 Wenn die Variable leer bleibt, wird kein Analytics-Script geladen.
-Wenn die Variable gesetzt ist, erscheint ein Consent-Banner und Analytics wird erst nach Zustimmung geladen.
+Wenn die Variable gesetzt ist, wird das Google-Analytics-Script direkt geladen.
 
 ## Kanäle konfigurieren
 

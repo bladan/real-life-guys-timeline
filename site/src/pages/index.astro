@@ -3,7 +3,6 @@ import '../styles/global.css';
 import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import GoogleAnalytics from '../components/GoogleAnalytics.astro';
-import CookieConsentBanner from '../components/CookieConsentBanner.astro';
 
 // Read all channels' metadata at build time from the source data folder.
 const videosDir = resolve(process.cwd(), 'data/videos');
@@ -378,8 +377,6 @@ const years: number[] = [...new Set(channels.flatMap((c) => c.years))].sort(
         </a>
       </div>
     </footer>
-
-    <CookieConsentBanner />
 
     <script>
       type Video = {

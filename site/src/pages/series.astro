@@ -3,7 +3,6 @@ import '../styles/global.css';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import GoogleAnalytics from '../components/GoogleAnalytics.astro';
-import CookieConsentBanner from '../components/CookieConsentBanner.astro';
 
 // Read all channels' playlist indexes at build time from the source data folder.
 const videosDir = resolve(process.cwd(), 'data/videos');
@@ -275,8 +274,6 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         </a>
       </div>
     </footer>
-
-    <CookieConsentBanner />
 
     <script>
       type Video = {
