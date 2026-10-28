@@ -9,15 +9,15 @@ const measurementId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
         async
         src={`https://www.googletagmanager.com/gtag/js?id=${measurementId}`}
       ></script>
-      <script is:inline>
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', '${measurementId}', {
-            anonymize_ip: true
-          });
-        `}
+      <script is:inline define:vars={{ measurementId }}>
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function () {
+          window.dataLayer.push(arguments);
+        };
+        window.gtag('js', new Date());
+        window.gtag('config', measurementId, {
+          anonymize_ip: true,
+        });
       </script>
     </>
   )
