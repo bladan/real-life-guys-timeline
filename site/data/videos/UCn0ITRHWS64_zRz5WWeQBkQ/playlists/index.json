@@ -32,14 +32,14 @@
       "title": "Der ÜBERLEBENSKAMPF - 100 TAGE Autark",
       "description": "",
       "video_count": 76,
-      "thumbnail": "https://i.ytimg.com/vi/gv6NMjSlCSg/maxresdefault.jpg",
+      "thumbnail": "https://i.ytimg.com/vi/-fG5_jLAWHk/maxresdefault.jpg",
       "order": 0
     },
     {
       "playlist_id": "PLJqgOm-_inuu_Sfk1xPyy4pZNtKO_QcQG",
       "title": "DIY - Projekte",
       "description": "",
-      "video_count": 178,
+      "video_count": 179,
       "thumbnail": "https://i.ytimg.com/vi/4G2wXl22XNE/maxresdefault.jpg",
       "order": 8
     },
@@ -55,7 +55,7 @@
       "playlist_id": "PLJqgOm-_inuujChpBuEH0tNuh5o1afdoN",
       "title": "Selbstgebaute Fahrzeuge",
       "description": "",
-      "video_count": 63,
+      "video_count": 65,
       "thumbnail": "https://i.ytimg.com/vi/TpHdL3naND0/maxresdefault.jpg",
       "order": 6
     },
@@ -124,5 +124,5 @@
       "order": 1
     }
   ],
-  "fetched_at": "2026-08-21T06:31:05.512Z"
+  "fetched_at": "2026-10-28T19:25:54.060Z"
 }

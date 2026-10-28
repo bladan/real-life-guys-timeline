@@ -4,7 +4,7 @@
   "channel_title": "Johannes Mickenbecker",
   "title": "MISSION WOLF",
   "description": "Ich versuche einen wildlebenden Wolf in Deutschland zu fotografieren",
-  "video_count": 6,
+  "video_count": 7,
   "thumbnail": "https://i.ytimg.com/vi/FNZuC-CxKcw/maxresdefault.jpg",
   "videos": [
     {
@@ -13,9 +13,9 @@
       "published_at": "2026-04-27T14:00:31Z",
       "thumbnail": "https://i.ytimg.com/vi/FNZuC-CxKcw/maxresdefault.jpg",
       "url": "https://www.youtube.com/watch?v=FNZuC-CxKcw",
-      "view_count": 35757,
-      "like_count": 1120,
-      "comment_count": 57
+      "view_count": 39004,
+      "like_count": 1138,
+      "comment_count": 58
     },
     {
       "video_id": "b403Q6NA4GQ",
@@ -23,9 +23,9 @@
       "published_at": "2026-04-30T14:05:05Z",
       "thumbnail": "https://i.ytimg.com/vi/b403Q6NA4GQ/maxresdefault.jpg",
       "url": "https://www.youtube.com/watch?v=b403Q6NA4GQ",
-      "view_count": 206166,
-      "like_count": 4101,
-      "comment_count": 112
+      "view_count": 237242,
+      "like_count": 4231,
+      "comment_count": 113
     },
     {
       "video_id": "kDbGVHllUbQ",
@@ -33,9 +33,9 @@
       "published_at": "2026-05-04T14:21:28Z",
       "thumbnail": "https://i.ytimg.com/vi/kDbGVHllUbQ/maxresdefault.jpg",
       "url": "https://www.youtube.com/watch?v=kDbGVHllUbQ",
-      "view_count": 40547,
-      "like_count": 1534,
-      "comment_count": 69
+      "view_count": 46441,
+      "like_count": 1576,
+      "comment_count": 64
     },
     {
       "video_id": "j_0rhA5fdr4",
@@ -43,9 +43,9 @@
       "published_at": "2026-05-07T14:15:09Z",
       "thumbnail": "https://i.ytimg.com/vi/j_0rhA5fdr4/maxresdefault.jpg",
       "url": "https://www.youtube.com/watch?v=j_0rhA5fdr4",
-      "view_count": 42442,
-      "like_count": 1396,
-      "comment_count": 68
+      "view_count": 47261,
+      "like_count": 1440,
+      "comment_count": 70
     },
     {
       "video_id": "TUMAfIIrD6g",
@@ -53,9 +53,9 @@
       "published_at": "2026-05-11T15:13:24Z",
       "thumbnail": "https://i.ytimg.com/vi/TUMAfIIrD6g/maxresdefault.jpg",
       "url": "https://www.youtube.com/watch?v=TUMAfIIrD6g",
-      "view_count": 49018,
-      "like_count": 1503,
-      "comment_count": 55
+      "view_count": 60423,
+      "like_count": 1590,
+      "comment_count": 59
     },
     {
       "video_id": "vunj-o_d7gc",
@@ -63,9 +63,19 @@
       "published_at": "2026-05-14T14:01:18Z",
       "thumbnail": "https://i.ytimg.com/vi/vunj-o_d7gc/maxresdefault.jpg",
       "url": "https://www.youtube.com/watch?v=vunj-o_d7gc",
-      "view_count": 89693,
-      "like_count": 3038,
-      "comment_count": 214
+      "view_count": 105231,
+      "like_count": 3186,
+      "comment_count": 216
+    },
+    {
+      "video_id": "u8ndKcP3NPQ",
+      "title": "Ich habe 5 TAGE im WALD verbracht und wurde nachts von WÖLFEN überrascht",
+      "published_at": "2026-09-28T14:42:22Z",
+      "thumbnail": "https://i.ytimg.com/vi/u8ndKcP3NPQ/maxresdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=u8ndKcP3NPQ",
+      "view_count": 181775,
+      "like_count": 2789,
+      "comment_count": 186
     }
   ]
 }
